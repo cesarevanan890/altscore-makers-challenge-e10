@@ -11,7 +11,7 @@ The raw mobility dataset (`mobility_data.parquet`) contains **340.4M+ device-lev
 
 ### 2. External Data Enrichment
 Per competition guidelines, public external data was integrated to capture topographical and urban context:
-- **Source:** [Open-Meteo Elevation API](https://open-meteo.com/en/docs/elevation-api) (`https://api.open-meteo.com/v1/elevation`)
+- **Source:** [Open-Meteo Elevation API](https://open-meteo.com/en/docs/elevation-api) (`[https://api.open-meteo.com/v1/elevation](https://api.open-meteo.com/v1/elevation)`)
 - **Features Extracted:**
   - `elevation_m`: Altitude (meters above sea level) at each hexagon's centroid.
   - `neighbor_avg_elevation_m` & `elevation_diff_neighbors_m`: Local terrain gradient comparing each cell against its immediate `k=1` H3 ring neighbors.
@@ -52,3 +52,36 @@ Per competition guidelines, public external data was integrated to capture topog
 ├── requirements.txt       # Python dependencies
 ├── README.md              # Methodology, external sources, and reproducibility guide
 └── .gitignore             # Excludes raw Parquet/CSV datasets and local cache files
+```
+
+---
+
+## How to Reproduce
+
+### 1. Clone the Repository & Install Dependencies
+```bash
+git clone https://github.com/cesarevanan890/altscore-makers-challenge-e10.git
+cd altscore-makers-challenge-e10
+pip install -r requirements.txt
+```
+
+### 2. Download Competition Datasets from Kaggle
+Raw datasets are excluded from version control (`.gitignore`) due to file size limits (`340M+` rows in Parquet). You can obtain them in two ways:
+
+* **Option A — Via Kaggle Web Interface:**
+  1. Go to the [AltScore Data Science Competition on Kaggle](https://www.kaggle.com/competitions/alt-score-data-science-competition/data) and accept the competition rules.
+  2. Download `train.csv`, `test.csv`, and `mobility_data.parquet`.
+  3. Place all three files directly into the root folder of this project (`altscore-makers-challenge-e10/`).
+
+* **Option B — Via Kaggle CLI:**
+  ```bash
+  pip install kaggle
+  kaggle competitions download -c alt-score-data-science-competition
+  unzip alt-score-data-science-competition.zip -d .
+  ```
+
+### 3. Run the Pipeline
+```bash
+python reto10.py
+```
+On the first run, the script streams `mobility_data.parquet` in 2M-row batches, queries the Open-Meteo Elevation API, caches both intermediate results (`hex_mobility_cache.parquet` and `elevation_cache.csv`), trains the 5-fold ensemble, and outputs **`submission.csv`** ready for Kaggle submission.
